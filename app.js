@@ -7,6 +7,8 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// const data = require("./data.json")
+
 const data = {
     "recipes": [
       {
@@ -56,25 +58,37 @@ const data = {
           "Remove mixture from heat; strain and enjoy"
         ]
       }
-    ],
-    "undefined": {
-      "name": "butteredBagel",
-      "ingredients": [
-        "1 bagel",
-        "butter"
-      ],
-      "instructions": [
-        "cut the bagel",
-        "spread butter on bagel"
-      ]
-    }
-  }
+    ]
+}
+
+const recipes = data.recipes
+const recipeNames = recipes.map( (el) => {
+    return el.name
+})
 
 // app.use("/recipes", recipesRouter)
 
 app.get('/', (req, res) => {
-    res.json({ ok: true, data });
+    res.json({ data });
+});
+
+app.get('/recipes', (req, res) => {
+    res.json({ recipeNames }).status(200)
+});
+
+app.get('recipes/:name', (req, res) => {
+    const { name } = req.params;
+    const details = recipes.filter((recipes) => recipes.name === name)[0];
+    res.json({ details })
 })
+
+app.post('/recipes', (req, res) => {
+    const { name, ingredients, instructions } = req.body;
+    if (name && ingredients && instructions) {
+        recipes.push({ name, ingredients, instructions });
+        res.status(201)
+    }
+});
 
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
