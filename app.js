@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const data = require("./data.json");
-const { callbackify } = require("util");
+// const { callbackify } = require("util");
 
 // const recipes = [
 //       {
@@ -65,38 +65,80 @@ const { callbackify } = require("util");
 
 
 const recipes = data.recipes
-const recipeNames = recipes.map( (el) => {
-    return el.name
-})
+
+// const details = recipes.map( (el) => {
+//     el.forEach(recipe => {
+//         let ingredients = recipe.ingredients;
+//         let numSteps = recipe.instructions.length
+//         return ({ingredients, numSteps})
+//     });
+// })
+
 
 // app.use("/recipes", recipesRouter)
 
 app.get('/', (req, res) => {
-    res.json({ data });
+    fs.readFile('./data.json', 'utf8', (err, string) => {
+        if (err) throw err;
+        const data = JSON.parse(string)
+        const recipes =  data.recipes
+        res.json({ recipes });
+    })
 });
 
 app.get('/recipes', (req, res) => {
+    const recipeNames = recipes.map( (el) => {
+        return el.name
+    })
     res.json({ recipeNames }).status(200)
 });
- 
-app.get('recipes/details/:name', (req, res) => {
-    const { name } = req.params;
-    const recipe = recipes.filter((recipe) => recipe.name === name)[0];
-    res.json({ recipe })
+
+// app.get('recipes/details', (req, res, next) => {
+//     res.json({ details }).status(200)
+// })
+
+
+app.get('/recipes/details/:name', (req, res) => {
+    const name = req.params.name
+    const details = recipes.filter(recipe => recipe.name.toLowerCase().includes(name))
+
+
+        if (!details) {
+        return res.status(200).send({})
+    }
+    res.json(details)
 })
 
-app.post('/recipes', (req, res, next) => {
-    const { name, ingredients, instructions } = req.body;
-    const newRecipe = { name, ingredients, instructions }
-    const jsonObj = JSON.parse(newRecipe)
-    const jsonContent = JSON.stringify(jsonObj);
-    fs.writeFile('./data.json', jsonContent, 'utf8', function(err) {
-        if(err) {
-            throw err
-        }
-        callbackify();
-    })
-});
+// app.get('recipes/details/:name', (req, res, next) => {
+//     const { name } = req.params;
+//     fs.readFile('./data.json', 'utf8', (err, string) => {
+//         if (err) throw err;
+//         const data = JSON.parse(string)
+//         const recipes =  data.recipes
+//         // const details = recipes.filter(myFunction)
+//         // function myFunction(, recipes) {
+//         //  return (recipes.name === name)
+//         // }
+//         // recipes.filter((recipe) => recipe.name === name);
+//         res.json({ details })
+        
+//     ;})
+    
+    
+// })
+
+// app.post('/recipes', (req, res, next) => {
+//     const { name, ingredients, instructions } = req.body;
+//     const newRecipe = { name, ingredients, instructions }
+//     const jsonObj = JSON.parse(newRecipe)
+//     const jsonContent = JSON.stringify(jsonObj);
+//     fs.writeFile('./data.json', jsonContent, 'utf8', function(err) {
+//         if(err) {
+//             throw err
+//         }
+//         callbackify();
+//     })
+// });
 
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
