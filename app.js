@@ -11,80 +11,24 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const data = require("./data.json");
-// const { callbackify } = require("util");
-
-// const recipes = [
-//       {
-//         "name": "scrambledEggs",
-//         "ingredients": [
-//           "1 tsp oil",
-//           "2 eggs",
-//           "salt"
-//         ],
-//         "instructions": [
-//           "Beat eggs with salt",
-//           "Heat oil in pan",
-//           "Add eggs to pan when hot",
-//           "Gather eggs into curds, remove when cooked",
-//           "Salt to taste and enjoy"
-//         ]
-//       },
-//       {
-//         "name": "garlicPasta",
-//         "ingredients": [
-//           "500mL water",
-//           "100g spaghetti",
-//           "25mL olive oil",
-//           "4 cloves garlic",
-//           "Salt"
-//         ],
-//         "instructions": [
-//           "Heat garlic in olive oil",
-//           "Boil water in pot",
-//           "Add pasta to boiling water",
-//           "Remove pasta from water and mix with garlic olive oil",
-//           "Salt to taste and enjoy"
-//         ]
-//       },
-//       {
-//         "name": "chai",
-//         "ingredients": [
-//           "400mL water",
-//           "100mL milk",
-//           "5g chai masala",
-//           "2 tea bags or 20 g loose tea leaves"
-//         ],
-//         "instructions": [
-//           "Heat water until 80 C",
-//           "Add milk, heat until 80 C",
-//           "Add tea leaves/tea bags, chai masala; mix and steep for 3-4 minutes",
-//           "Remove mixture from heat; strain and enjoy"
-//         ]
-//       }
-//     ]
-
-
 const recipes = data.recipes
-
-// const details = recipes.map( (el) => {
-//     el.forEach(recipe => {
-//         let ingredients = recipe.ingredients;
-//         let numSteps = recipe.instructions.length
-//         return ({ingredients, numSteps})
-//     });
-// })
 
 
 // app.use("/recipes", recipesRouter)
 
-app.get('/', (req, res) => {
-    fs.readFile('./data.json', 'utf8', (err, string) => {
-        if (err) throw err;
-        const data = JSON.parse(string)
-        const recipes =  data.recipes
-        res.json({ recipes });
-    })
-});
+// ## Part 1: successful
+// Build a GET route that returns all recipe names.
+// A GET request to http://localhost:3000/recipes returns:
+// Response body (JSON):
+// {
+// 	"recipeNames":
+// 		[
+// 			"scrambledEggs",
+// 			"garlicPasta",
+// 			"chai"
+// 		]
+// }
+// Status: 200
 
 app.get('/recipes', (req, res) => {
     const recipeNames = recipes.map( (el) => {
@@ -93,52 +37,104 @@ app.get('/recipes', (req, res) => {
     res.json({ recipeNames }).status(200)
 });
 
-// app.get('recipes/details', (req, res, next) => {
-//     res.json({ details }).status(200)
-// })
-
+// ## Part 2: successful
+// Build a GET route that takes a recipe name as a **string** param. Return the ingredients and the number of steps in the recipe as JSON
+// A GET request to http://localhost:3000/recipes/details/garlicPasta returns:
+// If recipe exists: 
+// Response body (JSON):
+// {
+// 	"details":
+// 		{
+// 			"ingredients": [
+// 				"500mL water",
+// 				"100g spaghetti",
+// 				"25mL olive oil",
+// 				"4 cloves garlic",
+// 				"Salt"
+// 			],
+// 			"numSteps":5
+// 		}
+// }
+// Status: 200
+// ---
+// If recipe does NOT exist: 
+// Response body (JSON): {}
+// Status: 200
 
 app.get('/recipes/details/:name', (req, res) => {
     const name = req.params.name
-    const details = recipes.filter(recipe => recipe.name.toLowerCase().includes(name))
-
-
-        if (!details) {
-        return res.status(200).send({})
-    }
-    res.json(details)
+    const listing = recipes.filter(recipe => recipe.name.toLowerCase().includes(name)) 
+    const details = listing.map(listing => {
+        return { ingredients: listing.ingredients, numSteps: listing.instructions.length }
+    })
+    res.json( {details} )
 })
 
-// app.get('recipes/details/:name', (req, res, next) => {
-//     const { name } = req.params;
-//     fs.readFile('./data.json', 'utf8', (err, string) => {
-//         if (err) throw err;
-//         const data = JSON.parse(string)
-//         const recipes =  data.recipes
-//         // const details = recipes.filter(myFunction)
-//         // function myFunction(, recipes) {
-//         //  return (recipes.name === name)
-//         // }
-//         // recipes.filter((recipe) => recipe.name === name);
-//         res.json({ details })
-        
-//     ;})
-    
-    
-// })
+// ## Part 3: unsuccessful
+// Add a POST route that can add additional recipes in the existing format to the backend with support for the above routes.
+// A POST request to http://localhost:3000/recipes with body 
+// {
+// 	"name": "butteredBagel", 
+// 		"ingredients": [
+// 			"1 bagel", 
+// 			"butter"
+// 		], 
+// 	"instructions": [
+// 		"cut the bagel", 
+// 		"spread butter on bagel"
+// 	] 
+// } 
+// returns:
+// Response body: None
+// Status: 201
+
+// Error Response:
+// If the recipe already exists:
+// Response body (JSON):
+// {
+// 	"error": "Recipe already exists"
+// }
+// Status: 400
+
+
+app.post('/recipes', (req, res) => {
+    const { name, ingredients, instructions } = req.body
+    const newRecipe = { name, ingredients, instructions}
+    recipes.push(newRecipe)
+    res.status(201)
+})
 
 // app.post('/recipes', (req, res, next) => {
 //     const { name, ingredients, instructions } = req.body;
 //     const newRecipe = { name, ingredients, instructions }
-//     const jsonObj = JSON.parse(newRecipe)
-//     const jsonContent = JSON.stringify(jsonObj);
-//     fs.writeFile('./data.json', jsonContent, 'utf8', function(err) {
-//         if(err) {
-//             throw err
-//         }
-//         callbackify();
-//     })
+//     data.push(newRecipe)
 // });
+
+// ## Part 4: not yet attempted
+// Add a PUT route that can update existing recipes.
+// A PUT request to http://localhost:3000/recipes with body 
+// {
+// 	"name": "butteredBagel", 
+// 		"ingredients": [
+// 			"1 bagel", 
+// 			"2 tbsp butter"
+// 		], 
+// 	"instructions": [
+// 		"cut the bagel", 
+// 		"spread butter on bagel"
+// 	] 
+// } returns:
+// Response body: None
+// Status: 204
+
+// Error Response:
+// If the recipe doesn't exist:
+// Response body (JSON):
+// {
+// 	"error": "Recipe does not exist"
+// }
+// Status: 404
+
 
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
