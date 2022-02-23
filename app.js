@@ -13,6 +13,9 @@ app.use(bodyParser.json());
 const data = require("./data.json");
 const recipes = data.recipes
 
+app.get('/', (req, res) => {
+    res.send('Hello, world!')
+})
 
 // app.use("/recipes", recipesRouter)
 
@@ -62,7 +65,7 @@ app.get('/recipes', (req, res) => {
 // Status: 200
 
 app.get('/recipes/details/:name', (req, res) => {
-    const name = req.params.name
+    const name = req.params.name.toLowerCase()
     const listing = recipes.filter(recipe => recipe.name.toLowerCase().includes(name)) 
     const details = listing.map(listing => {
         return { ingredients: listing.ingredients, numSteps: listing.instructions.length }
@@ -70,7 +73,7 @@ app.get('/recipes/details/:name', (req, res) => {
     res.json( {details} )
 })
 
-// ## Part 3: unsuccessful
+// ## Part 3: successful
 // Add a POST route that can add additional recipes in the existing format to the backend with support for the above routes.
 // A POST request to http://localhost:3000/recipes with body 
 // {
@@ -100,15 +103,19 @@ app.get('/recipes/details/:name', (req, res) => {
 app.post('/recipes', (req, res) => {
     const { name, ingredients, instructions } = req.body
     const newRecipe = { name, ingredients, instructions}
-    recipes.push(newRecipe)
-    res.status(201)
+
+    const exists = recipes.find(recipe => recipe.name === name) 
+    if(exists) {
+        return res.status(400).json ({
+            error: `Recipe already exists`
+        })
+    }
+    if(!exists) {
+        recipes.push(newRecipe)
+        res.sendStatus(201)
+    }
 })
 
-// app.post('/recipes', (req, res, next) => {
-//     const { name, ingredients, instructions } = req.body;
-//     const newRecipe = { name, ingredients, instructions }
-//     data.push(newRecipe)
-// });
 
 // ## Part 4: not yet attempted
 // Add a PUT route that can update existing recipes.
@@ -135,6 +142,22 @@ app.post('/recipes', (req, res) => {
 // }
 // Status: 404
 
+app.put('/recipes', (req, res) => {
+    
+    const { name, ingredients, instructions } = req.body
+    const updatedRecipe = { name, ingredients, instructions}
+
+    const exists = recipes.find(recipe => recipe.name === name) 
+    if(!exists) {
+        return res.status(404).json ({
+            error: `Recipe does not exist`
+        })
+    }
+    if(exists) {
+        exists = updatedRecipe
+        res.sendStatus(204)
+    }
+})
 
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
