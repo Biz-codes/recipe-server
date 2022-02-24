@@ -154,7 +154,8 @@ app.put('/recipes', (req, res) => {
         })
     }
     if(exists) {
-        exists = updatedRecipe
+        const index = recipes.findIndex(recipe => recipe.name === name)
+        recipes[index] = updatedRecipe
         res.sendStatus(204)
     }
 })
