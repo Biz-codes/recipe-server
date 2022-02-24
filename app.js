@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require('cors');
-const fs = require('fs')
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -117,7 +116,7 @@ app.post('/recipes', (req, res) => {
 })
 
 
-// ## Part 4: not yet attempted
+// ## Part 4: successful
 // Add a PUT route that can update existing recipes.
 // A PUT request to http://localhost:3000/recipes with body 
 // {
@@ -147,17 +146,16 @@ app.put('/recipes', (req, res) => {
     const { name, ingredients, instructions } = req.body
     const updatedRecipe = { name, ingredients, instructions}
 
-    const exists = recipes.find(recipe => recipe.name === name) 
-    if(!exists) {
+    const index = recipes.findIndex(recipe => recipe.name === name)
+    if (!recipes[index]) {
         return res.status(404).json ({
             error: `Recipe does not exist`
         })
     }
-    if(exists) {
-        const index = recipes.findIndex(recipe => recipe.name === name)
-        recipes[index] = updatedRecipe
-        res.sendStatus(204)
-    }
+    
+    recipes[index] = updatedRecipe
+    res.sendStatus(204)
+   
 })
 
 app.listen(port, () => {
