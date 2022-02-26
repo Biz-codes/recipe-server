@@ -6,7 +6,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const data = require("./data.json");
@@ -15,8 +14,6 @@ const recipes = data.recipes
 app.get('/', (req, res) => {
     res.send('Hello, world!')
 })
-
-// app.use("/recipes", recipesRouter)
 
 // ## Part 1: successful
 // Build a GET route that returns all recipe names.
@@ -66,11 +63,13 @@ app.get('/recipes', (req, res) => {
 app.get('/recipes/details/:name', (req, res) => {
     const name = req.params.name.toLowerCase()
     const listing = recipes.filter(recipe => recipe.name.toLowerCase().includes(name)) 
-    const details = listing.map(listing => {
+    const info = listing.map(listing => {
         return { ingredients: listing.ingredients, numSteps: listing.instructions.length }
     })
+    details = info[0]
     res.json( {details} )
 })
+
 
 // ## Part 3: successful
 // Add a POST route that can add additional recipes in the existing format to the backend with support for the above routes.
