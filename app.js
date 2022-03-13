@@ -67,7 +67,7 @@ app.get('/recipes/details/:name', (req, res) => {
         return { ingredients: listing.ingredients, numSteps: listing.instructions.length }
     })
     details = info[0]
-    res.json( {details} )
+    res.json( {details} ).status(200)
 })
 
 
