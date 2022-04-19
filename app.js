@@ -63,7 +63,7 @@ app.get('/recipes', (req, res) => {
 
 app.get('/recipes/details/:name', (req, res) => {
     const name = req.params.name.toLowerCase()
-    const listing = recipes.find(recipe => recipe.name.toLowerCase() === name.toLowerCase())
+    const listing = recipes.filter(recipe => recipe.name.toLowerCase().includes(name))
     const info = listing.map(listing => {
         return { 
             ingredients: listing.ingredients, 
