@@ -1,5 +1,5 @@
-const express = require("express");
-const bodyParser = require("body-parser");
+const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
@@ -8,12 +8,13 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-const data = require("./data.json");
+const data = require('./data.json')
 const recipes = data.recipes
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')
 })
+
 
 // ## Part 1: successful
 // Build a GET route that returns all recipe names.
@@ -30,10 +31,10 @@ app.get('/', (req, res) => {
 // Status: 200
 
 app.get('/recipes', (req, res) => {
-    const recipeNames = recipes.map( (el) => {
+    const recipeNames = recipes.map((el) => {
         return el.name
     })
-    res.json({ recipeNames }).status(200)
+    res.json( {recipeNames} ).status(200)
 });
 
 // ## Part 2: successful
@@ -62,14 +63,16 @@ app.get('/recipes', (req, res) => {
 
 app.get('/recipes/details/:name', (req, res) => {
     const name = req.params.name.toLowerCase()
-    const listing = recipes.filter(recipe => recipe.name.toLowerCase().includes(name)) 
+    const listing = recipes.filter(recipe => recipe.name.toLowerCase().includes(name))
     const info = listing.map(listing => {
-        return { ingredients: listing.ingredients, numSteps: listing.instructions.length }
+        return { 
+            ingredients: listing.ingredients, 
+            numSteps: listing.instructions.length 
+        }
     })
     details = info[0]
-    res.json( {details} ).status(200)
+    res.json ({ details }).status(200)
 })
-
 
 // ## Part 3: successful
 // Add a POST route that can add additional recipes in the existing format to the backend with support for the above routes.
@@ -97,23 +100,22 @@ app.get('/recipes/details/:name', (req, res) => {
 // }
 // Status: 400
 
-
 app.post('/recipes', (req, res) => {
     const { name, ingredients, instructions } = req.body
-    const newRecipe = { name, ingredients, instructions}
+    const newRecipe = { name, ingredients, instructions }
 
-    const exists = recipes.find(recipe => recipe.name === name) 
+    const exists = recipes.find(recipe => recipe.name.toLowerCase() === name.toLowerCase())
     if(exists) {
         return res.status(400).json ({
             error: `Recipe already exists`
         })
     }
+
     if(!exists) {
         recipes.push(newRecipe)
         res.sendStatus(201)
     }
 })
-
 
 // ## Part 4: successful
 // Add a PUT route that can update existing recipes.
@@ -140,25 +142,20 @@ app.post('/recipes', (req, res) => {
 // }
 // Status: 404
 
-app.put('/recipes', (req, res) => {
-    
-    const { name, ingredients, instructions } = req.body
-    const updatedRecipe = { name, ingredients, instructions}
+app.put('/recipes/', (req, res) => {
 
-    const index = recipes.findIndex(recipe => recipe.name === name)
-    if (!recipes[index]) {
+    const { name, ingredients, instructions } = req.body
+    const updatedRecipe = {name, ingredients, instructions}
+
+    const index = recipes.findIndex(recipe => recipe.name.toLowerCase() === name.toLowerCase())
+    if(!recipes[index]) {
         return res.status(404).json ({
             error: `Recipe does not exist`
         })
     }
-    
+
     recipes[index] = updatedRecipe
     res.sendStatus(204)
-   
 })
-
-app.listen(port, () => {
- console.log(`Server running on port ${port}`);
-});
 
 module.exports = app
